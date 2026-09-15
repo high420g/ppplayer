@@ -27,7 +27,7 @@
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-bottom: 25px; }
         .btn { background: none; border: none; color: #b3b3b3; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .btn:hover { color: white; transform: scale(1.1); }
-        .btn-play { width: 65px; height: 65px; background: #00f0ff; border-radius: 50%; color: black; font-size: 26px; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 5px 15px rgba(0,240,255,0.4); }
+        .btn-play { width: 65px; height: 65px; background: #00f0ff; border-radius: 50%; color: black; font-size: 26px; display: flex; align-items: center; justify-content: center; border: none; box-shadow: 0 5px 15px rgba(0,240,255,0.4); cursor: pointer; }
         .btn-play:hover { background: #55f5ff; transform: scale(1.05); }
         
         .volume-container { display: flex; align-items: center; justify-content: center; gap: 15px; color: #b3b3b3; font-size: 14px; }
@@ -50,7 +50,7 @@
         <div class="track-art" id="track-art"><i class="fas fa-compact-disc"></i></div>
 
         <!-- Информация о текущем потоке -->
-        <div class="track-title" id="track-title">Загрузка потоков...</div>
+        <div class="track-title" id="track-title">Загрузка...</div>
         <div class="track-artist" id="track-artist">Жанр</div>
 
         <!-- Кнопки -->
@@ -86,17 +86,14 @@
         let currentTrackIndex = 0;
         let isPlaying = false;
 
-        // База стабильных музыкальных станций, которые никогда не заблокируют подключение
+        // База стабильных музыкальных станций
         const stationLibrary = [
             { name: "Hot Hip-Hop & Rap", artist: "RAP / URBAN", url: "https://syntheticfm.com" },
             { name: "Synthwave Neo Drive", artist: "SYNTH / PHONK", url: "https://nightride.fm" },
             { name: "Chillout Lounge Beats", artist: "CHILL / LO-FI", url: "https://ndr.de" },
-            { name: "Ultimate Rock Hits", artist: "ROCK / METAL", url: "https://rockantenne.as صد.fastly.net/rockantenne/stream/mp3" },
+            { name: "Ultimate Rock Hits", artist: "ROCK / METAL", url: "https://rockantenne.de" },
             { name: "Top 40 Pop Hits", artist: "POP / DANCE", url: "https://wdr.de" }
         ];
-
-        // Запасные рабочие зеркала на случай сбоев магистралей
-        stationLibrary[3].url = "https://rockantenne.de"; 
 
         let playlist = [...stationLibrary];
 
@@ -176,7 +173,7 @@
             playTrack();
         }
 
-        // Инициализация
+        // Инициализация первой станции при загрузке
         loadTrack(currentTrackIndex);
 
         volumeSlider.addEventListener('input', (e) => { audio.volume = e.target.value; });
@@ -184,5 +181,9 @@
         nextBtn.addEventListener('click', nextTrack);
         prevBtn.addEventListener('click', prevTrack);
         searchBtn.addEventListener('click', () => searchMusic(searchInput.value));
-searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchMusic(searchInput.value); });
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchMusic(searchInput.value); });
+    </script>
+</body>
+</html>
+
 
