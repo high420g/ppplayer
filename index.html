@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TG Music Player</title>
+    <!-- Подключаем стили для красивого интерфейса -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Подключаем скрипт Telegram, чтобы приложение понимало, что оно внутри TG -->
+    <script src="https://telegram.org"></script>
+</head>
+<body class="bg-zinc-900 text-white font-sans flex flex-col items-center justify-between min-h-screen p-6 select-none">
+
+    <!-- Шапка приложения -->
+    <div class="text-center w-full mt-4">
+        <h1 class="text-xs uppercase tracking-widest text-zinc-400 font-bold">Сейчас играет</h1>
+        <p id="player-status" class="text-amber-500 text-sm font-semibold mt-1">Мини-плеер готов</p>
+    </div>
+
+    <!-- Обложка трека и инфо -->
+    <div class="flex flex-col items-center w-full my-auto">
+        <div class="w-64 h-64 bg-zinc-800 rounded-2xl shadow-2xl flex items-center justify-center border border-zinc-700 overflow-hidden mb-8">
+            <span class="text-6xl">🎵</span>
+        </div>
+        <h2 id="track-title" class="text-2xl font-bold text-center px-4 truncate w-full">Выберите трек</h2>
+        <p id="track-artist" class="text-zinc-400 text-md mt-1 text-center">Исполнитель</p>
+    </div>
+
+    <!-- Управление плеером -->
+    <div class="w-full max-w-sm bg-zinc-800/50 border border-zinc-800 rounded-3xl p-6 mb-4 backdrop-blur-md">
+        <!-- Список треков для выбора -->
+        <div class="space-y-2 mb-6 max-h-40 overflow-y-auto pr-1">
+            <button onclick="playTrack('https://soundhelix.com', 'Лоуфай для кодинга', 'Lofi Chill')" class="w-full text-left bg-zinc-800 hover:bg-zinc-700 p-3 rounded-xl transition flex justify-between items-center text-sm">
+                <span>🎧 Lofi Chill - Лоуфай</span> <span class="text-xs text-zinc-500">▶️</span>
+            </button>
+            <button onclick="playTrack('https://soundhelix.com', 'Энергичный бит', 'Synthwave Hero')" class="w-full text-left bg-zinc-800 hover:bg-zinc-700 p-3 rounded-xl transition flex justify-between items-center text-sm">
+                <span>⚡ Synthwave Hero - Бит</span> <span class="text-xs text-zinc-500">▶️</span>
+            </button>
+        </div>
+
+        <!-- Кнопки управления -->
+        <div class="flex items-center justify-center gap-6">
+            <button id="btn-play" onclick="togglePlay()" class="w-16 h-16 bg-amber-500 text-zinc-950 font-bold rounded-full flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20 active:scale-95 transition">
+                ▶️
+            </button>
+        </div>
+    </div>
+
+    <!-- Невидимый аудио-плеер -->
+    <audio id="audio-player"></audio>
+
+    <script>
+        // Инициализируем Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрываем приложение на весь экран телефона
+
+        const audio = document.getElementById('audio-player');
+        const playBtn = document.getElementById('btn-play');
+        const titleEl = document.getElementById('track-title');
+        const artistEl = document.getElementById('track-artist');
+        const statusEl = document.getElementById('player-status');
+
+        // Функция запуска трека
+        function playTrack(url, title, artist) {
+            audio.src = url;
+            titleEl.innerText = title;
+            artistEl.innerText = artist;
+            audio.play();
+            playBtn.innerText = '⏸️';
+            statusEl.innerText = 'Воспроизведение';
+        }
+
+        // Функция Пауза / Старт
+        function togglePlay() {
+            if (!audio.src) {
+                statusEl.innerText = 'Сначала выберите трек!';
+                return;
+            }
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = '⏸️';
+                statusEl.innerText = 'Воспроизведение';
+            } else {
+                audio.pause();
+                playBtn.innerText = '▶️';
+                statusEl.innerText = 'На паузе';
+            }
+        }
+    </script>
+</body>
+</html>
