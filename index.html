@@ -8,87 +8,77 @@
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
-        body { background: linear-gradient(135deg, #0b0813, #161329); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        body { background: linear-gradient(135deg, #0f0c1b, #201c3a); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .player-container { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
         
-        .player-container { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(15px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-radius: 24px; 
-            padding: 25px; 
-            width: 100%; 
-            max-width: 480px; 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.8); 
-            text-align: center; 
-        }
+        .search-box { display: flex; background: rgba(255,255,255,0.1); border-radius: 50px; padding: 5px 15px; margin-bottom: 25px; border: 1px solid transparent; transition: 0.3s; align-items: center; }
+        .search-box:focus-within { border-color: #1db954; background: rgba(255,255,255,0.15); }
+        .search-box input { background: none; border: none; color: white; padding: 10px; width: 100%; font-size: 14px; outline: none; }
         
-        .player-header { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #ff0055; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .track-art { width: 220px; height: 220px; background: linear-gradient(45deg, #1db954, #191414); margin: 0 auto 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 50px; color: #fff; }
+        .track-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .track-artist { font-size: 14px; color: #b3b3b3; margin-bottom: 25px; }
         
-        .search-box { display: flex; background: rgba(255,255,255,0.06); border-radius: 50px; padding: 5px 15px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; align-items: center; }
-        .search-box:focus-within { border-color: #ff0055; background: rgba(255,255,255,0.1); box-shadow: 0 0 15px rgba(255,0,85,0.3); }
-        .search-box input { background: none; border: none; color: white; padding: 12px; width: 100%; font-size: 14px; outline: none; }
-        .search-box button { background: none; border: none; color: #ff0055; cursor: pointer; font-size: 18px; padding: 0 10px; transition: 0.2s; }
-        .search-box button:hover { transform: scale(1.1); }
-
-        .widget-wrapper { 
-            width: 100%; 
-            height: 270px; 
-            border-radius: 16px; 
-            overflow: hidden; 
-            background: #000; 
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
+        .platform-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .platform-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border: none; border-radius: 50px; font-size: 15px; font-weight: 700; cursor: pointer; text-decoration: none; transition: 0.2s; color: #fff; }
         
-        iframe { border: none; width: 100%; height: 100%; }
+        .btn-sc { background: #ff5500; box-shadow: 0 4px 15px rgba(255, 85, 0, 0.3); }
+        .btn-sc:hover { background: #ff7733; transform: scale(1.02); }
+        .btn-yt { background: #ff0000; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); }
+        .btn-yt:hover { background: #ff3333; transform: scale(1.02); }
         
-        .footer-info { font-size: 12px; color: #666; margin-top: 15px; line-height: 1.4; font-weight: 500; }
-        .brand { color: #ff0055; font-weight: 600; }
+        .status-msg { font-size: 12px; color: #b3b3b3; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <div class="player-container">
-        <div class="player-header">
-            <i class="fas fa-headphones-alt"></i> PREMIUM MUSIC HUB
-        </div>
-
-        <!-- Поисковая строка -->
+        <!-- Поиск треков -->
         <div class="search-box">
-            <input type="text" id="search-input" placeholder="Введите трек (например: OG Buda, Rocket)...">
-            <button id="search-btn"><i class="fas fa-search"></i></button>
+            <input type="text" id="search-input" placeholder="Введите трек (OG Buda, Rocket)..." value="OG Buda">
         </div>
 
-        <!-- Сюда будет загружаться музыкальный поток -->
-        <div class="widget-wrapper">
-            <iframe id="music-player" src="https://youtube.com"></iframe>
+        <div class="track-art"><i class="fas fa-compact-disc"></i></div>
+        <div class="track-title" id="display-title">OG Buda</div>
+        <div class="track-artist">Глобальный поиск трека</div>
+
+        <!-- Кнопки мгновенного перенаправления в стриминги -->
+        <div class="platform-buttons">
+            <a href="https://soundcloud.com" target="_blank" class="platform-btn btn-sc" id="sc-link">
+                <i class="fab fa-soundcloud"></i> Включить в SoundCloud
+            </a>
+            <a href="https://youtube.com" target="_blank" class="platform-btn btn-yt" id="yt-link">
+                <i class="fab fa-youtube"></i> Включить в YouTube Music
+            </a>
         </div>
 
-        <div class="footer-info">
-            Поиск работает по всей мировой базе треков. Введите любого исполнителя и нажмите <span class="brand">Enter</span>.
-        </div>
+        <div class="status-msg">Введите трек и выберите платформу для проигрывания</div>
     </div>
 
     <script>
-        const searchBtn = document.getElementById('search-btn');
         const searchInput = document.getElementById('search-input');
-        const musicPlayer = document.getElementById('music-player');
+        const displayTitle = document.getElementById('display-title');
+        const scLink = document.getElementById('sc-link');
+        const ytLink = document.getElementById('yt-link');
 
-        function startSearch() {
+        function updateLinks() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            // Магия: переключаем плеер в режим автопоиска по YouTube и сразу включаем первый найденный трек
-            musicPlayer.src = `https://youtube.com{encodeURIComponent(query)}&autoplay=1`;
+            // Обновляем визуальное название трека в плеере
+            displayTitle.textContent = query;
+
+            // Генерируем прямые ссылки для обхода CORS блокировок
+            scLink.href = `https://soundcloud.com{encodeURIComponent(query)}`;
+            ytLink.href = `https://youtube.com{encodeURIComponent(query)}`;
         }
 
-        searchBtn.addEventListener('click', startSearch);
-        searchInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') startSearch();
-        });
+        // Обновление ссылок на лету при вводе текста
+        searchInput.addEventListener('input', updateLinks);
     </script>
 </body>
 </html>
+
 
 
 
