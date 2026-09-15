@@ -3,89 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TG Music Player</title>
-    <!-- Подключаем стили для красивого интерфейса -->
-    <script src="https://jsdelivr.net"></script>
-    <!-- Подключаем скрипт Telegram, чтобы приложение понимало, что оно внутри TG -->
-    <script src="https://telegram.org"></script>
+    <title>Premium Music Player</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c1b, #201c3a); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .player-container { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 30px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); text-align: center; }
+        .search-box { display: flex; background: rgba(255,255,255,0.1); border-radius: 50px; padding: 5px 15px; margin-bottom: 25px; border: 1px solid transparent; transition: 0.3s; }
+        .search-box:focus-within { border-color: #1db954; background: rgba(255,255,255,0.15); }
+        .search-box input { background: none; border: none; color: white; padding: 10px; width: 100%; font-size: 14px; outline: none; }
+        .search-box button { background: none; border: none; color: #1db954; cursor: pointer; font-size: 18px; padding: 0 10px; }
+        .track-art { width: 220px; height: 220px; background: #282828; margin: 0 auto 25px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 50px; color: #555; background-size: cover; background-position: center; transition: transform 0.3s ease; }
+        .track-art.playing { transform: scale(1.03); }
+        .track-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-artist { font-size: 14px; color: #b3b3b3; margin-bottom: 25px; }
+        .progress-area { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; margin-bottom: 30px; }
+        .progress-bar { height: 100%; width: 0%; background: #1db954; border-radius: 10px; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-bottom: 20px; }
+        .btn { background: none; border: none; color: #b3b3b3; font-size: 20px; cursor: pointer; transition: 0.2s; }
+        .btn:hover { color: white; }
+        .btn-play { width: 60px; height: 60px; background: #1db954; border-radius: 50%; color: black; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+        .btn-play:hover { background: #1ed760; transform: scale(1.05); color: black; }
+        .volume-container { display: flex; align-items: center; justify-content: center; gap: 10px; color: #b3b3b3; font-size: 12px; }
+        .volume-slider { -webkit-appearance: none; width: 80px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 50px; outline: none; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; background: #1db954; border-radius: 50%; cursor: pointer; }
+        .status-msg { font-size: 12px; color: #1db954; margin-top: 15px; height: 15px; }
+    </style>
 </head>
-<body class="bg-zinc-900 text-white font-sans flex flex-col items-center justify-between min-h-screen p-6 select-none">
-
-    <!-- Шапка приложения -->
-    <div class="text-center w-full mt-4">
-        <h1 class="text-xs uppercase tracking-widest text-zinc-400 font-bold">Сейчас играет</h1>
-        <p id="player-status" class="text-amber-500 text-sm font-semibold mt-1">Мини-плеер готов</p>
-    </div>
-
-    <!-- Обложка трека и инфо -->
-    <div class="flex flex-col items-center w-full my-auto">
-        <div class="w-64 h-64 bg-zinc-800 rounded-2xl shadow-2xl flex items-center justify-center border border-zinc-700 overflow-hidden mb-8">
-            <span class="text-6xl">🎵</span>
+<body>
+    <div class="player-container">
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Введите жанр на англ. (rock, pop)...">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
         </div>
-        <h2 id="track-title" class="text-2xl font-bold text-center px-4 truncate w-full">Выберите трек</h2>
-        <p id="track-artist" class="text-zinc-400 text-md mt-1 text-center">Исполнитель</p>
-    </div>
-
-    <!-- Управление плеером -->
-    <div class="w-full max-w-sm bg-zinc-800/50 border border-zinc-800 rounded-3xl p-6 mb-4 backdrop-blur-md">
-        <!-- Список треков для выбора -->
-        <div class="space-y-2 mb-6 max-h-40 overflow-y-auto pr-1">
-            <button onclick="playTrack('https://soundhelix.com', 'Лоуфай для кодинга', 'Lofi Chill')" class="w-full text-left bg-zinc-800 hover:bg-zinc-700 p-3 rounded-xl transition flex justify-between items-center text-sm">
-                <span>🎧 Lofi Chill - Лоуфай</span> <span class="text-xs text-zinc-500">▶️</span>
-            </button>
-            <button onclick="playTrack('https://soundhelix.com', 'Энергичный бит', 'Synthwave Hero')" class="w-full text-left bg-zinc-800 hover:bg-zinc-700 p-3 rounded-xl transition flex justify-between items-center text-sm">
-                <span>⚡ Synthwave Hero - Бит</span> <span class="text-xs text-zinc-500">▶️</span>
-            </button>
+        <div class="track-art" id="track-art"><i class="fas fa-music"></i></div>
+        <div class="track-title" id="track-title">Музыкальный Плеер</div>
+        <div class="track-artist" id="track-artist">Используйте поиск выше</div>
+        <div class="progress-area" id="progress-area"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="controls">
+            <button class="btn" id="prev-btn"><i class="fas fa-step-backward"></i></button>
+            <button class="btn btn-play" id="play-btn"><i class="fas fa-play"></i></button>
+            <button class="btn" id="next-btn"><i class="fas fa-step-forward"></i></button>
         </div>
-
-        <!-- Кнопки управления -->
-        <div class="flex items-center justify-center gap-6">
-            <button id="btn-play" onclick="togglePlay()" class="w-16 h-16 bg-amber-500 text-zinc-950 font-bold rounded-full flex items-center justify-center text-2xl shadow-lg shadow-amber-500/20 active:scale-95 transition">
-                ▶️
-            </button>
+        <div class="volume-container">
+            <i class="fas fa-volume-down"></i>
+            <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
+            <i class="fas fa-volume-up"></i>
         </div>
+        <div class="status-msg" id="status-msg"></div>
     </div>
-
-    <!-- Невидимый аудио-плеер -->
-    <audio id="audio-player"></audio>
-
-    <script>
-        // Инициализируем Telegram Web App
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрываем приложение на весь экран телефона
-
-        const audio = document.getElementById('audio-player');
-        const playBtn = document.getElementById('btn-play');
-        const titleEl = document.getElementById('track-title');
-        const artistEl = document.getElementById('track-artist');
-        const statusEl = document.getElementById('player-status');
-
-        // Функция запуска трека
-        function playTrack(url, title, artist) {
-            audio.src = url;
-            titleEl.innerText = title;
-            artistEl.innerText = artist;
-            audio.play();
-            playBtn.innerText = '⏸️';
-            statusEl.innerText = 'Воспроизведение';
-        }
-
-        // Функция Пауза / Старт
-        function togglePlay() {
-            if (!audio.src) {
-                statusEl.innerText = 'Сначала выберите трек!';
-                return;
-            }
-            if (audio.paused) {
-                audio.play();
-                playBtn.innerText = '⏸️';
-                statusEl.innerText = 'Воспроизведение';
-            } else {
-                audio.pause();
-                playBtn.innerText = '▶️';
-                statusEl.innerText = 'На паузе';
-            }
-        }
-    </script>
+    <!-- Подключаем логику из второго файла -->
+    <script src="script.js"></script>
 </body>
 </html>
