@@ -12,66 +12,68 @@ const volumeSlider = document.getElementById('volume-slider');
 const statusMsg = document.getElementById('status-msg');
 
 const audio = new Audio();
-let playlist = [];
 let currentTrackIndex = 0;
 let isPlaying = false;
 
-async function searchMusic(query) {
-    if (!query) return;
-    statusMsg.textContent = 'Ищем треки...';
-    try {
-        // Используем резервный стабильный роут Jamendo API
-        const response = await fetch(`https://jamendo.com{encodeURIComponent(query)}&include=musicinfo`);
-        const data = await response.json();
-        
-        if (data.results && data.results.length > 0) {
-            playlist = data.results.filter(track => track.audio);
-            currentTrackIndex = 0;
-            if (playlist.length > 0) {
-                loadTrack(currentTrackIndex);
-                playTrack();
-                statusMsg.textContent = `Успешно! Найдено ${playlist.length} треков`;
-            } else { 
-                statusMsg.textContent = 'Аудиофайлы скрыты приватностью.'; 
-            }
-        } else { 
-            statusMsg.textContent = 'Ничего не найдено. Попробуйте: pop, rock, chill'; 
-        }
-    } catch (error) { 
-        statusMsg.textContent = 'Ошибка сети или API.'; 
-        console.error(error);
+// Встроенная стабильная база треков (разные жанры)
+const mainLibrary = [
+    {
+        name: "Lost in the City Lights",
+        artist: "Cosmo Sheldrake (Chill / Electronic)",
+        audio: "https://soundhelix.com",
+        image: "https://picsum.photos"
+    },
+    {
+        name: "Cyberpunk Drive",
+        artist: "Neon Vapor (Synthwave / Rock)",
+        audio: "https://soundhelix.com",
+        image: "https://picsum.photos"
+    },
+    {
+        name: "Summer Breeze",
+        artist: "Lo-Fi Beats (Chillhop / Pop)",
+        audio: "https://soundhelix.com",
+        image: "https://picsum.photos"
+    },
+    {
+        name: "Dark Energy",
+        artist: "Shadow Phase (Industrial / Rock)",
+        audio: "https://soundhelix.com",
+        image: "https://picsum.photos"
+    },
+    {
+        name: "Atmospheric Horizon",
+        artist: "Ambient Space (Electronic)",
+        audio: "https://soundhelix.com",
+        image: "https://picsum.photos"
     }
-}
+];
+
+// При старте плейлист равен всей библиотеке
+let playlist = [...mainLibrary];
 
 function loadTrack(index) {
+    if (playlist.length === 0) return;
     const track = playlist[index];
     trackTitle.textContent = track.name;
-    trackArtist.textContent = track.artist_name;
+    trackArtist.textContent = track.artist;
     audio.src = track.audio;
-    if (track.image) {
-        trackArt.style.backgroundImage = `url('${track.image}')`;
-        trackArt.innerHTML = '';
-    } else {
-        trackArt.style.backgroundImage = 'none';
-        trackArt.innerHTML = '<i class="fas fa-music"></i>';
-    }
+    trackArt.style.backgroundImage = `url('${track.image}')`;
+    trackArt.innerHTML = '';
     audio.volume = volumeSlider.value;
 }
 
 function playTrack() {
     isPlaying = true;
     audio.play().catch(e => {
-        statusMsg.textContent = "Нажмите Play для старта!";
+        statusMsg.textContent = "Нажмите Play для воспроизведения";
     });
     playBtn.innerHTML = '<i class="fas fa-pause"></i>';
     trackArt.classList.add('playing');
 }
 
 function togglePlay() {
-    if (playlist.length === 0) {
-        statusMsg.textContent = 'Сначала введите запрос в поиск!';
-        return;
-    }
+    if (playlist.length === 0) return;
     if (isPlaying) {
         isPlaying = false;
         audio.pause();
@@ -96,6 +98,34 @@ function prevTrack() {
     playTrack();
 }
 
+// Функция мгновенного поиска по встроенной библиотеке
+function searchMusic(query) {
+    const cleanQuery = query.toLowerCase().trim();
+    if (!cleanQuery) {
+        playlist = [...mainLibrary];
+        statusMsg.textContent = "Показаны все треки";
+    } else {
+        playlist = mainLibrary.filter(track => 
+            track.name.toLowerCase().includes(cleanQuery) || 
+            track.artist.toLowerCase().includes(cleanQuery)
+        );
+        
+        if (playlist.length > 0) {
+            statusMsg.textContent = `Найдено треков: ${playlist.length}`;
+        } else {
+            statusMsg.textContent = "Ничего не найдено. Сброс поиска...";
+            playlist = [...mainLibrary];
+        }
+    }
+    currentTrackIndex = 0;
+    loadTrack(currentTrackIndex);
+    playTrack();
+}
+
+// Инициализация плеера при загрузке страницы
+loadTrack(currentTrackIndex);
+
+// Обработчики событий
 audio.addEventListener('timeupdate', () => {
     if (audio.duration) {
         progressBar.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
